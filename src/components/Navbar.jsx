@@ -57,13 +57,6 @@ const Navbar = () => {
               <House />
             </Link>
             <Link
-              to="/features"
-              className="flex items-center bg-white text-blue-600 py-2 px-4 rounded-full shadow-md hover:bg-blue-500 hover:text-white transition-all duration-300 font-medium"
-            >
-              <span className="mr-2">Plans</span>
-              <ServerCog />
-            </Link>
-            <Link
               to="/about"
               className="flex items-center bg-white text-blue-600 py-2 px-4 rounded-full shadow-md hover:bg-blue-500 hover:text-white transition-all duration-300 font-medium"
             >

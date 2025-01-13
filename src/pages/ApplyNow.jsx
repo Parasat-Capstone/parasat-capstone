@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import plan40 from "../assets/40mb hfc.avif";
 import plan25 from "../assets/25mb hfc.avif";
 
@@ -32,12 +33,12 @@ const ApplyNow = () => {
               <li>Any proof of billing</li>
               <li>Sketch of home address with landmark</li>
             </ul>
-            <a
-              href="#apply"
+            <Link
+              to="/application-form"
               className="mt-6 inline-block bg-blue-600 text-white py-3 px-6 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 font-medium"
             >
               Apply Now
-            </a>
+            </Link>
           </div>
         </div>
       </div>

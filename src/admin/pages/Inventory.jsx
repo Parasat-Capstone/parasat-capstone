@@ -1,70 +1,118 @@
 import React, { useState } from "react";
+import { Edit, Trash2 } from "lucide-react";
 
 const Inventory = () => {
   const [inventory, setInventory] = useState([
-    { id: 1, name: "Item 1", quantity: 25 },
-    { id: 2, name: "Item 2", quantity: 10 },
-    { id: 3, name: "Item 3", quantity: 0 },
+    {
+      id: 1,
+      name: "Item 1",
+      quantity: 25,
+      location: "Warehouse A",
+      date: "2023-01-12",
+    },
+    {
+      id: 2,
+      name: "Item 2",
+      quantity: 10,
+      location: "Warehouse B",
+      date: "2023-01-10",
+    },
+    {
+      id: 3,
+      name: "Item 3",
+      quantity: 0,
+      location: "Warehouse C",
+      date: "2023-01-08",
+    },
   ]);
 
   const [formData, setFormData] = useState({
     id: null,
     name: "",
     quantity: "",
+    location: "",
+    date: "",
   });
   const [isEditing, setIsEditing] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "",
+    location: "",
+    name: "",
+  });
 
-  // Handle form input changes
+  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Add a new item
-  const handleAddItem = (e) => {
+  // Add or edit item
+  const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (formData.name && formData.quantity) {
+    if (isEditing) {
+      setInventory(
+        inventory.map((item) => (item.id === formData.id ? formData : item))
+      );
+    } else {
       setInventory([...inventory, { ...formData, id: Date.now() }]);
-      setFormData({ id: null, name: "", quantity: "" });
     }
+    resetForm();
   };
 
-  // Edit an item
+  // Reset form
+  const resetForm = () => {
+    setFormData({ id: null, name: "", quantity: "", location: "", date: "" });
+    setIsEditing(false);
+  };
+
+  // Edit item
   const handleEditItem = (item) => {
     setIsEditing(true);
     setFormData(item);
   };
 
-  // Save edited item
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
-    setInventory(
-      inventory.map((item) => (item.id === formData.id ? formData : item))
-    );
-    setIsEditing(false);
-    setFormData({ id: null, name: "", quantity: "" });
-  };
-
-  // Delete an item
+  // Delete item
   const handleDeleteItem = (id) => {
     setInventory(inventory.filter((item) => item.id !== id));
   };
 
-  // Determine stock status
+  // Filter inventory
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters({ ...filters, [name]: value });
+  };
+
+  const filteredInventory = inventory.filter((item) => {
+    const status =
+      item.quantity === 0
+        ? "Out of Stock"
+        : item.quantity < 20
+        ? "Low Stock"
+        : "In Stock";
+    return (
+      (filters.status ? status === filters.status : true) &&
+      (filters.location
+        ? item.location.toLowerCase().includes(filters.location.toLowerCase())
+        : true) &&
+      (filters.name
+        ? item.name.toLowerCase().includes(filters.name.toLowerCase())
+        : true)
+    );
+  });
+
   const getStockStatus = (quantity) => {
     if (quantity === 0) return "Out of Stock";
     if (quantity < 20) return "Low Stock";
-    return "Full Stock";
+    return "In Stock";
   };
 
-  // Determine stock status styles
   const getStatusStyles = (status) => {
     switch (status) {
       case "Out of Stock":
         return "text-red-600 bg-red-100";
       case "Low Stock":
         return "text-yellow-600 bg-yellow-100";
-      case "Full Stock":
+      case "In Stock":
         return "text-green-600 bg-green-100";
       default:
         return "";
@@ -73,103 +121,156 @@ const Inventory = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-4xl font-bold mb-6 text-gray-800">
-        Inventory Management
-      </h1>
+      <h1 className="text-3xl font-bold mb-6">Inventory Management</h1>
 
-      {/* Inventory Form */}
+      {/* Filters and Add/Edit Form */}
       <form
-        onSubmit={isEditing ? handleSaveEdit : handleAddItem}
-        className="bg-white shadow-md rounded-lg p-6 mb-6"
+        onSubmit={handleFormSubmit}
+        className="bg-gray-100 shadow-sm rounded-lg p-4 mb-6"
       >
-        <h2 className="text-2xl font-semibold mb-4">
-          {isEditing ? "Edit Item" : "Add New Item"}
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Item Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Quantity
-            </label>
-            <input
-              type="number"
-              name="quantity"
-              value={formData.quantity}
-              onChange={handleInputChange}
-              className="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div>
-          <div className="flex items-end">
-            <button
-              type="submit"
-              className={`w-full p-3 rounded-lg text-white font-semibold ${
-                isEditing ? "bg-yellow-500" : "bg-blue-500"
-              } hover:opacity-90`}
-            >
-              {isEditing ? "Save Changes" : "Add Item"}
-            </button>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <select
+            name="status"
+            value={filters.status}
+            onChange={handleFilterChange}
+            className="p-2 bg-white border border-gray-300 rounded-md"
+          >
+            <option value="">All Status</option>
+            <option>In Stock</option>
+            <option>Low Stock</option>
+            <option>Out of Stock</option>
+          </select>
+          <input
+            type="text"
+            name="location"
+            placeholder="Warehouse Location"
+            value={filters.location}
+            onChange={handleFilterChange}
+            className="p-2 bg-white border border-gray-300 rounded-md"
+          />
+          <input
+            type="text"
+            name="name"
+            placeholder="Search Item"
+            value={filters.name}
+            onChange={handleFilterChange}
+            className="p-2 bg-white border border-gray-300 rounded-md"
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input
+            type="text"
+            name="name"
+            placeholder="Item Name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="p-2 bg-white border border-gray-300 rounded-md"
+            required
+          />
+          <input
+            type="number"
+            name="quantity"
+            placeholder="Quantity"
+            value={formData.quantity}
+            onChange={handleInputChange}
+            className="p-2 bg-white border border-gray-300 rounded-md"
+            required
+          />
+          <input
+            type="text"
+            name="location"
+            placeholder="Location"
+            value={formData.location}
+            onChange={handleInputChange}
+            className="p-2 bg-white border border-gray-300 rounded-md"
+            required
+          />
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleInputChange}
+            className="p-2 bg-white border border-gray-300 rounded-md"
+            required
+          />
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={resetForm}
+            className="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className={`py-2 px-4 rounded-md text-white ${
+              isEditing
+                ? "bg-yellow-500 hover:bg-yellow-600"
+                : "bg-blue-500 hover:bg-blue-600"
+            }`}
+          >
+            {isEditing ? "Save Changes" : "Add Item"}
+          </button>
         </div>
       </form>
 
       {/* Inventory Table */}
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full bg-white">
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+        <table className="w-full table-auto">
           <thead className="bg-gray-100">
             <tr>
-              <th className="py-3 px-4 text-left font-medium text-gray-700 uppercase tracking-wider">
+              <th className="py-3 px-4 text-left font-semibold text-gray-600">
                 Item Name
               </th>
-              <th className="py-3 px-4 text-left font-medium text-gray-700 uppercase tracking-wider">
+              <th className="py-3 px-4 text-left font-semibold text-gray-600">
                 Quantity
               </th>
-              <th className="py-3 px-4 text-left font-medium text-gray-700 uppercase tracking-wider">
+              <th className="py-3 px-4 text-left font-semibold text-gray-600">
                 Stock Status
               </th>
-              <th className="py-3 px-4 text-left font-medium text-gray-700 uppercase tracking-wider">
+              <th className="py-3 px-4 text-left font-semibold text-gray-600">
+                Location
+              </th>
+              <th className="py-3 px-4 text-left font-semibold text-gray-600">
+                Last Updated
+              </th>
+              <th className="py-3 px-4 text-left font-semibold text-gray-600">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {inventory.map((item) => {
+            {filteredInventory.map((item) => {
               const status = getStockStatus(item.quantity);
               return (
-                <tr key={item.id}>
-                  <td className="py-3 px-4 text-gray-800">{item.name}</td>
-                  <td className="py-3 px-4 text-gray-800">{item.quantity}</td>
+                <tr
+                  key={item.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  <td className="py-3 px-4">{item.name}</td>
+                  <td className="py-3 px-4">{item.quantity}</td>
                   <td
-                    className={`py-3 px-4 font-semibold text-sm rounded ${getStatusStyles(
+                    className={`py-3 px-4 rounded-md text-center ${getStatusStyles(
                       status
                     )}`}
                   >
                     {status}
                   </td>
-                  <td className="py-3 px-4 space-x-2">
+                  <td className="py-3 px-4">{item.location}</td>
+                  <td className="py-3 px-4">{item.date}</td>
+                  <td className="py-3 px-4 flex gap-2">
                     <button
                       onClick={() => handleEditItem(item)}
-                      className="bg-yellow-500 text-white py-1 px-3 rounded-lg hover:opacity-90"
+                      className="text-yellow-500 hover:text-yellow-600"
                     >
-                      Edit
+                      <Edit className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDeleteItem(item.id)}
-                      className="bg-red-500 text-white py-1 px-3 rounded-lg hover:opacity-90"
+                      className="text-red-500 hover:text-red-600"
                     >
-                      Delete
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </td>
                 </tr>

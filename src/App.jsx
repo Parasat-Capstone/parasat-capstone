@@ -10,6 +10,7 @@ import ApplyNow from "./pages/ApplyNow";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
+import ApplicationForm from "./pages/SubscriberForm";
 
 // Admin Dashboard Pages
 import Sidebar from "./admin/components/Sidebar";
@@ -17,7 +18,7 @@ import DashboardHome from "./admin/pages/DashboardHome";
 import Subscribers from "./admin/pages/Subscribers";
 import Reports from "./admin/pages/Reports";
 import Inventory from "./admin/pages/Inventory";
-// import Settings from "./admin/pages/Settings";
+import SubscriberForm from "./pages/SubscriberForm";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
             <Route path="features" element={<Features />} />
             <Route path="apply" element={<ApplyNow />} />
             <Route path="contact" element={<ContactUs />} />
+            <Route path="application-form" element={<SubscriberForm />} />
             <Route path="*" element={<NotFound />} />
           </Route>
 
@@ -39,7 +41,7 @@ function App() {
             <Route index element={<DashboardHome />} />
             <Route path="subscribers" element={<Subscribers />} />
             <Route path="reports" element={<Reports />} />
-            {/* <Route path="settings" element={<Settings />} /> */}
+            <Route path="inventory" element={<Inventory />} />
           </Route>
         </Routes>
       </div>
@@ -56,6 +58,7 @@ const ClientLayout = () => (
       <Route path="/features" element={<Features />} />
       <Route path="/apply" element={<ApplyNow />} />
       <Route path="/contact" element={<ContactUs />} />
+      <Route path="/application-form" element={<SubscriberForm />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
     <Footer />
