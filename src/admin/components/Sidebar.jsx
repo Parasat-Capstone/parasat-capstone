@@ -1,13 +1,13 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Users, BarChart2, Settings } from "lucide-react"; // Icons for enhanced design
+import { Home, Users, BarChart2, Settings, Archive } from "lucide-react"; // Icons for enhanced design
 
 const Sidebar = () => {
   const navItems = [
-    { label: "Dashboard Home", path: "/dashboard", Icon: Home },
+    { label: "Overview", path: "/dashboard", Icon: Home },
     { label: "Subscribers", path: "/dashboard/subscribers", Icon: Users },
     { label: "Reports", path: "/dashboard/reports", Icon: BarChart2 },
-    { label: "Settings", path: "/dashboard/settings", Icon: Settings },
+    { label: "Inventory", path: "/dashboard/settings", Icon: Archive },
   ];
 
   return (
