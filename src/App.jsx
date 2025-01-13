@@ -16,6 +16,7 @@ import Sidebar from "./admin/components/Sidebar";
 import DashboardHome from "./admin/pages/DashboardHome";
 import Subscribers from "./admin/pages/Subscribers";
 import Reports from "./admin/pages/Reports";
+import Inventory from "./admin/pages/Inventory";
 // import Settings from "./admin/pages/Settings";
 
 function App() {
@@ -69,7 +70,7 @@ const AdminLayout = () => (
         <Route path="" element={<DashboardHome />} />
         <Route path="subscribers" element={<Subscribers />} />
         <Route path="reports" element={<Reports />} />
-        {/* <Route path="settings" element={<Settings />} /> */}
+        <Route path="inventory" element={<Inventory />} />
       </Routes>
     </div>
   </div>
