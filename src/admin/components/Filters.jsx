@@ -62,3 +62,5 @@ const Filters = ({ filters, handleFilterChange }) => {
     </div>
   );
 };
+
+export default Filters;
