@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Edit, Trash2 } from "lucide-react";
+import Metrics from "../components/Metrics";
+import Filters from "../components/Filters";
+import Pagination from "../components/Pagination";
+import InventoryTable from "../components/InventoryTable";
+import ItemDetailsModal from "../components/ItemDetailsModal";
+import ItemModal from "../components/ItemModal";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal";
 import { db } from "../../../firebase";
 import {
   collection,
@@ -9,6 +15,8 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Inventory = () => {
   const [inventory, setInventory] = useState([]);
@@ -16,15 +24,16 @@ const Inventory = () => {
     id: null,
     name: "",
     quantity: "",
-    location: "",
     date: "",
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [filters, setFilters] = useState({
-    status: "",
-    location: "",
-    name: "",
-  });
+  const [filters, setFilters] = useState({ status: "", name: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemPerPage] = useState(5);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
 
   useEffect(() => {
     const fetchInventory = async () => {
@@ -34,20 +43,17 @@ const Inventory = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log("Fetched Inventory:", inventoryList); // Debugging line
       setInventory(inventoryList);
     };
 
     fetchInventory();
   }, []);
 
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Add or edit item
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (isEditing) {
@@ -56,35 +62,54 @@ const Inventory = () => {
       setInventory(
         inventory.map((item) => (item.id === formData.id ? formData : item))
       );
+      toast.success("Item updated successfully!");
     } else {
       const newItem = await addDoc(collection(db, "inventory"), formData);
       setInventory([...inventory, { ...formData, id: newItem.id }]);
+      toast.success("Item added successfully!");
     }
     resetForm();
+    setIsModalOpen(false);
   };
 
-  // Reset form
   const resetForm = () => {
-    setFormData({ id: null, name: "", quantity: "", location: "", date: "" });
+    setFormData({ id: null, name: "", quantity: "", date: "" });
     setIsEditing(false);
   };
 
-  // Edit item
   const handleEditItem = (item) => {
     setIsEditing(true);
     setFormData(item);
+    setIsModalOpen(true);
   };
 
-  // Delete item
-  const handleDeleteItem = async (id) => {
-    await deleteDoc(doc(db, "inventory", id));
-    setInventory(inventory.filter((item) => item.id !== id));
+  const handleDeleteItem = (id) => {
+    setItemToDelete(id);
+    setIsDeleteModalOpen(true);
   };
 
-  // Filter inventory
+  const confirmDeleteItem = async () => {
+    await deleteDoc(doc(db, "inventory", itemToDelete));
+    setInventory(inventory.filter((item) => item.id !== itemToDelete));
+    setIsDeleteModalOpen(false);
+    toast.success("Item deleted successfully!");
+  };
+
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilters({ ...filters, [name]: value });
+  };
+
+  const handleShowDetails = (item) => {
+    setSelectedItem(item);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedItem(null);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   const filteredInventory = inventory.filter((item) => {
@@ -96,194 +121,58 @@ const Inventory = () => {
         : "In Stock";
     return (
       (filters.status ? status === filters.status : true) &&
-      (filters.location
-        ? item.location.toLowerCase().includes(filters.location.toLowerCase())
-        : true) &&
       (filters.name
         ? item.name.toLowerCase().includes(filters.name.toLowerCase())
         : true)
     );
   });
 
-  const getStockStatus = (quantity) => {
-    if (quantity === 0) return "Out of Stock";
-    if (quantity < 20) return "Low Stock";
-    return "In Stock";
-  };
-
-  const getStatusStyles = (status) => {
-    switch (status) {
-      case "Out of Stock":
-        return "text-red-600 bg-red-100";
-      case "Low Stock":
-        return "text-yellow-600 bg-yellow-100";
-      case "In Stock":
-        return "text-green-600 bg-green-100";
-      default:
-        return "";
-    }
-  };
+  const paginatedInventory = filteredInventory.slice(
+    (currentPage - 1) * itemPerPage,
+    currentPage * itemPerPage
+  );
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Inventory Management</h1>
 
-      {/* Filters and Add/Edit Form */}
-      <form
-        onSubmit={handleFormSubmit}
-        className="bg-gray-100 shadow-sm rounded-lg p-4 mb-6"
+      <Metrics inventory={inventory} />
+      <Filters filters={filters} handleFilterChange={handleFilterChange} />
+      <button
+        onClick={() => {
+          resetForm();
+          setIsModalOpen(true);
+        }}
+        className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 mb-6"
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <select
-            name="status"
-            value={filters.status}
-            onChange={handleFilterChange}
-            className="p-2 bg-white border border-gray-300 rounded-md"
-          >
-            <option value="">All Status</option>
-            <option>In Stock</option>
-            <option>Low Stock</option>
-            <option>Out of Stock</option>
-          </select>
-          <input
-            type="text"
-            name="location"
-            placeholder="Warehouse Location"
-            value={filters.location}
-            onChange={handleFilterChange}
-            className="p-2 bg-white border border-gray-300 rounded-md"
-          />
-          <input
-            type="text"
-            name="name"
-            placeholder="Search Item"
-            value={filters.name}
-            onChange={handleFilterChange}
-            className="p-2 bg-white border border-gray-300 rounded-md"
-          />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input
-            type="text"
-            name="name"
-            placeholder="Item Name"
-            value={formData.name}
-            onChange={handleInputChange}
-            className="p-2 bg-white border border-gray-300 rounded-md"
-            required
-          />
-          <input
-            type="number"
-            name="quantity"
-            placeholder="Quantity"
-            value={formData.quantity}
-            onChange={handleInputChange}
-            className="p-2 bg-white border border-gray-300 rounded-md"
-            required
-          />
-          <input
-            type="text"
-            name="location"
-            placeholder="Location"
-            value={formData.location}
-            onChange={handleInputChange}
-            className="p-2 bg-white border border-gray-300 rounded-md"
-            required
-          />
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleInputChange}
-            className="p-2 bg-white border border-gray-300 rounded-md"
-            required
-          />
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={resetForm}
-            className="bg-gray-300 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className={`py-2 px-4 rounded-md text-white ${
-              isEditing
-                ? "bg-yellow-500 hover:bg-yellow-600"
-                : "bg-blue-500 hover:bg-blue-600"
-            }`}
-          >
-            {isEditing ? "Save Changes" : "Add Item"}
-          </button>
-        </div>
-      </form>
-
-      {/* Inventory Table */}
-      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table className="w-full table-auto">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="py-3 px-4 text-left font-semibold text-gray-600">
-                Item Name
-              </th>
-              <th className="py-3 px-4 text-left font-semibold text-gray-600">
-                Quantity
-              </th>
-              <th className="py-3 px-4 text-left font-semibold text-gray-600">
-                Stock Status
-              </th>
-              <th className="py-3 px-4 text-left font-semibold text-gray-600">
-                Location
-              </th>
-              <th className="py-3 px-4 text-left font-semibold text-gray-600">
-                Last Updated
-              </th>
-              <th className="py-3 px-4 text-left font-semibold text-gray-600">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredInventory.map((item) => {
-              const status = getStockStatus(item.quantity);
-              return (
-                <tr
-                  key={item.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="py-3 px-4">{item.name}</td>
-                  <td className="py-3 px-4">{item.quantity}</td>
-                  <td
-                    className={`py-3 px-4 rounded-md text-center ${getStatusStyles(
-                      status
-                    )}`}
-                  >
-                    {status}
-                  </td>
-                  <td className="py-3 px-4">{item.location}</td>
-                  <td className="py-3 px-4">{item.date}</td>
-                  <td className="py-3 px-4 flex gap-2">
-                    <button
-                      onClick={() => handleEditItem(item)}
-                      className="text-yellow-500 hover:text-yellow-600"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteItem(item.id)}
-                      className="text-red-500 hover:text-red-600"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+        Add Item
+      </button>
+      <InventoryTable
+        inventory={paginatedInventory}
+        handleShowDetails={handleShowDetails}
+        handleEditItem={handleEditItem}
+        handleDeleteItem={handleDeleteItem}
+      />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={Math.ceil(filteredInventory.length / itemPerPage)}
+        onPageChange={handlePageChange}
+      />
+      <ItemDetailsModal item={selectedItem} onClose={handleCloseDetails} />
+      <ItemModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleFormSubmit={handleFormSubmit}
+        isEditing={isEditing}
+      />
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={confirmDeleteItem}
+      />
+      <ToastContainer />
     </div>
   );
 };

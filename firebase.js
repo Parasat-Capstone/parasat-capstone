@@ -3,13 +3,13 @@ import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyCOaqIBtW8XW-0hyqaVHX6xaWsoWZlCc_8",
+  authDomain: "parasat-capstone.firebaseapp.com",
+  projectId: "parasat-capstone",
+  storageBucket: "parasat-capstone.firebasestorage.app",
+  messagingSenderId: "601975530130",
+  appId: "1:601975530130:web:e9e05eead6a122832cbc4b",
+  measurementId: "G-GYFYKHW2EW",
 };
 
 const app = initializeApp(firebaseConfig);
