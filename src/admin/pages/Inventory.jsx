@@ -34,6 +34,7 @@ const Inventory = () => {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log("Fetched Inventory:", inventoryList); // Debugging line
       setInventory(inventoryList);
     };
 
