@@ -10,7 +10,7 @@ import ApplyNow from "./pages/ApplyNow";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
-import ApplicationForm from "./pages/ApplicationForm";
+import SubscriberForm from "./pages/SubscriberForm";
 
 // Admin Dashboard Pages
 import Sidebar from "./admin/components/Sidebar";
@@ -31,7 +31,7 @@ function App() {
             <Route path="features" element={<Features />} />
             <Route path="apply" element={<ApplyNow />} />
             <Route path="contact" element={<ContactUs />} />
-            <Route path="application-form" element={<ApplicationForm />} />
+            <Route path="application-form" element={<SubscriberForm />} />
             <Route path="*" element={<NotFound />} />
           </Route>
 
@@ -57,7 +57,7 @@ const ClientLayout = () => (
       <Route path="/features" element={<Features />} />
       <Route path="/apply" element={<ApplyNow />} />
       <Route path="/contact" element={<ContactUs />} />
-      <Route path="/application-form" element={<ApplicationForm />} />
+      <Route path="/application-form" element={<SubscriberForm />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
     <Footer />
