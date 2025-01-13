@@ -1,31 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Edit, Trash2 } from "lucide-react";
+import { db } from "../../../firebase";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 const Inventory = () => {
-  const [inventory, setInventory] = useState([
-    {
-      id: 1,
-      name: "Item 1",
-      quantity: 25,
-      location: "Warehouse A",
-      date: "2023-01-12",
-    },
-    {
-      id: 2,
-      name: "Item 2",
-      quantity: 10,
-      location: "Warehouse B",
-      date: "2023-01-10",
-    },
-    {
-      id: 3,
-      name: "Item 3",
-      quantity: 0,
-      location: "Warehouse C",
-      date: "2023-01-08",
-    },
-  ]);
-
+  const [inventory, setInventory] = useState([]);
   const [formData, setFormData] = useState({
     id: null,
     name: "",
@@ -40,6 +26,20 @@ const Inventory = () => {
     name: "",
   });
 
+  useEffect(() => {
+    const fetchInventory = async () => {
+      const inventoryCollection = collection(db, "inventory");
+      const inventorySnapshot = await getDocs(inventoryCollection);
+      const inventoryList = inventorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setInventory(inventoryList);
+    };
+
+    fetchInventory();
+  }, []);
+
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -47,14 +47,17 @@ const Inventory = () => {
   };
 
   // Add or edit item
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (isEditing) {
+      const itemDoc = doc(db, "inventory", formData.id);
+      await updateDoc(itemDoc, formData);
       setInventory(
         inventory.map((item) => (item.id === formData.id ? formData : item))
       );
     } else {
-      setInventory([...inventory, { ...formData, id: Date.now() }]);
+      const newItem = await addDoc(collection(db, "inventory"), formData);
+      setInventory([...inventory, { ...formData, id: newItem.id }]);
     }
     resetForm();
   };
@@ -72,7 +75,8 @@ const Inventory = () => {
   };
 
   // Delete item
-  const handleDeleteItem = (id) => {
+  const handleDeleteItem = async (id) => {
+    await deleteDoc(doc(db, "inventory", id));
     setInventory(inventory.filter((item) => item.id !== id));
   };
 
