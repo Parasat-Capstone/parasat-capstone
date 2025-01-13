@@ -10,14 +10,13 @@ import ApplyNow from "./pages/ApplyNow";
 import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 import AboutUs from "./pages/AboutUs";
-import ApplicationForm from "./pages/SubscriberForm";
+import SubscriberForm from "./pages/SubscriberForm";
 
 // Admin Dashboard Pages
 import Sidebar from "./admin/components/Sidebar";
 import DashboardHome from "./admin/pages/DashboardHome";
 import Subscribers from "./admin/pages/Subscribers";
 import Reports from "./admin/pages/Reports";
-import Inventory from "./admin/pages/Inventory";
 import SubscriberForm from "./pages/SubscriberForm";
 
 function App() {
@@ -41,7 +40,6 @@ function App() {
             <Route index element={<DashboardHome />} />
             <Route path="subscribers" element={<Subscribers />} />
             <Route path="reports" element={<Reports />} />
-            <Route path="inventory" element={<Inventory />} />
           </Route>
         </Routes>
       </div>
@@ -73,7 +71,6 @@ const AdminLayout = () => (
         <Route path="" element={<DashboardHome />} />
         <Route path="subscribers" element={<Subscribers />} />
         <Route path="reports" element={<Reports />} />
-        <Route path="inventory" element={<Inventory />} />
       </Routes>
     </div>
   </div>
